@@ -1,32 +1,14 @@
-# ---- Base Stage ----
-# Use a specific version of an official Node.js image based on Alpine Linux
-FROM node:20-alpine AS base
-WORKDIR /usr/src/app
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
 
-# ---- Dependencies Stage ----
-# Copy only package files and install dependencies to leverage Docker layer caching
-FROM base AS dependencies
-COPY package*.json ./
-RUN npm install
+# Set the working directory in the container to /app
+WORKDIR /app
 
-# ---- Build Stage ----
-# Copy source code and build the application
-FROM dependencies AS build
-COPY . .
-# Replace 'npm run build' with your actual build command
-RUN npm run build
+# Copy the contents of the local app directory into the container at /app
+COPY ./app/ .
 
-# ---- Production Stage ----
-# Create the final, lean production image
-FROM base AS production
-ENV NODE_ENV=production
-# Copy only production dependencies from the 'dependencies' stage
-COPY --from=dependencies /usr/src/app/node_modules ./node_modules
-# Copy built application from the 'build' stage
-COPY --from=build /usr/src/app/dist ./dist
+# Install the requests library, which is needed for the HTTP GET request
+RUN pip install requests
 
-# Expose the application port
-EXPOSE 3000
-
-# Command to run the application
-CMD ["node", "dist/main.js"]
+# Run healthcheck.py when the container launches
+CMD ["python", "healthcheck.py"]
