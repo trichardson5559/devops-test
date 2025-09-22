@@ -69,7 +69,7 @@ def main():
 
     # Process the result.
     if is_ok:
-        print("OK")
+        print("OK-version2")
         sys.exit(0)
     else:
         print("UNAVAILABLE")
