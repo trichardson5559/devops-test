@@ -1,14 +1,21 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Use an official lightweight Python image
+FROM python:3.11-slim
 
-# Set the working directory in the container to /app
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the contents of the local app directory into the container at /app
-COPY ./app/ .
+# Copy the requirements file first to leverage Docker layer caching
+COPY requirements.txt .
 
-# Install the requests library, which is needed for the HTTP GET request
-RUN pip install requests
+# Install the dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Run healthcheck.py when the container launches
-CMD ["python", "healthcheck.py"]
+# Copy your Python script into the container
+COPY healthcheck.py .
+
+# Make the script executable
+RUN chmod +x healthcheck.py
+
+# Set the entrypoint to run your script
+# This allows you to pass arguments like --url when you run the container
+ENTRYPOINT ["python", "./healthcheck.py"]
